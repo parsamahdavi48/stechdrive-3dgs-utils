@@ -39,6 +39,8 @@ For Metashape results, export cameras as Agisoft XML and sparse points as Stanfo
 
 Choose this when you want this app to run [COLMAP](https://github.com/colmap/colmap) or GLOMAP without using Metashape.
 
+For Windows, use the [official COLMAP 4.2.0 CUDA ZIP](https://github.com/colmap/colmap/releases/download/4.2.0/colmap-x64-windows-cuda.zip). Extract the ZIP and select its top-level `COLMAP.bat`. It supports RTX 50-series GPUs without a custom build.
+
 - 360° images are expanded into cubemap rigs
 - normal images and normal video frames remain normal cameras
 - mixed sources can be processed in one COLMAP dataset
@@ -48,43 +50,57 @@ For video-like input, start with `Sequential` matching. For a smaller unordered 
 
 Normal images use automatic camera estimation in the GUI. If you need explicit calibrated intrinsics, prepare them as external metadata before import rather than entering per-image camera parameters in this step.
 
+Choose cubemap resolution with the image-conversion scale; the feature limit is 8,192 per face. These settings are separate from spherical ERP SfM. Since each 360° frame produces several faces, a per-face limit is not directly comparable with a per-ERP-image limit.
+
+COLMAP Global / Incremental Mapper keeps the relative positions and orientations of views from one 360° frame fixed. ERP-only projects also keep the rendered field of view and image center fixed; mixed ordinary-photo projects retain intrinsic calibration. Matching within the same frame is skipped only when this run generates a non-overlapping cube layout with fields of view at most 90°. Custom overlapping layouts remain eligible for matching. External GLOMAP uses its own mapper settings.
+
+When rerunning SfM with previously generated rig images, enable Image Conversion as well if prompted, so the view images and camera settings stay aligned. Reusing a completed sparse model in Step 5 does not require regeneration.
+
 ### Run COLMAP Spherical SfM
 
-Choose this when you want to run SfM on equirectangular 360° images as spherical cameras without cubemap projection first. This route uses official [COLMAP](https://github.com/colmap/colmap) 4.1 or newer with the native `EQUIRECTANGULAR` camera model. Treat it as a route for same-resolution ERP 360° images only. Use the cubemap COLMAP route or Metashape when you need mixed normal images or multiple ERP resolutions.
+Choose this to run SfM directly on equirectangular frames from a 360° video, without cubemap conversion. Use **ERP 360° images of the same resolution**, keeping their sequential filename order. For mixed ordinary photos or different ERP resolutions, use the cubemap COLMAP route or Metashape.
 
-#### Select the Launcher and Version
+#### Choosing COLMAP
 
-COLMAP is not bundled with this app and is not installed by `setup_windows.bat`. Install or extract COLMAP separately, then use one of these choices:
+Extract the [official COLMAP 4.2.0 Windows CUDA ZIP](https://github.com/colmap/colmap/releases/download/4.2.0/colmap-x64-windows-cuda.zip) and select its top-level `COLMAP.bat`. This package supports RTX 50-series GPUs without a custom build for that generation. COLMAP is not bundled with the app or `setup_windows.bat`.
 
-| Installation | Selection in Step 4 |
-| --- | --- |
-| Official Windows ZIP | Select the package's top-level `COLMAP.bat`. This is the recommended choice because it establishes the package library paths. |
-| Official Windows `bin/colmap.exe` | You may select it; the app detects the adjacent top-level `COLMAP.bat` and uses that launcher automatically. |
-| Standalone or custom `colmap.exe` | Select it directly only when its runtime libraries are already available. The capability preflight still applies. |
-| COLMAP on `PATH` | Leave the field blank. On Windows, the app searches for `COLMAP.bat` first and then `colmap.exe`. |
+- Selecting the same package's `bin/colmap.exe` automatically uses its packaged launcher.
+- Leaving the field blank searches Windows PATH for `COLMAP.bat`, then `colmap.exe`.
+- Existing COLMAP 4.1 installations remain supported. Required CLI capabilities and GPU SIFT startup are checked before processing.
+- COLMAP's CUDA version does not require changing the app's mask-generation Python environment.
 
-COLMAP 4.1 is the supported minimum because it introduced the native `EQUIRECTANGULAR` camera model used by this route. COLMAP 4.2 or newer is recommended, particularly with the `Quality` preset: that preset enables guided matching, and the [COLMAP 4.2 changelog](https://github.com/colmap/colmap/blob/4.2.0/CHANGELOG.rst) includes the corresponding spherical-camera fix. COLMAP 4.1 remains usable for existing projects and the `Fast` / `Standard` presets.
+#### Choosing a Processing Setting
 
-#### What the Preflight Checks
+Standard retains input detail. Choose Light, then Lightest when reducing processing time or GPU memory use matters more.
 
-Before the full SfM run, the app performs these checks in order:
+| Processing setting | Feature-extraction resolution | Example for 7680 × 3840 input | Feature limit per ERP image |
+| --- | --- | --- | --- |
+| Standard (default) | Original input | 7680 × 3840 | 32,768 |
+| Light | Half width and height | 3840 × 1920 | 16,384 |
+| Lightest | Quarter width and height | 1920 × 960 | 8,192 |
 
-1. Run the selected launcher and require COLMAP 4.1.0 or newer.
-2. Read the help for the selected feature extractor, matcher, and mapper, then confirm every CLI option required by the current GUI settings is available.
-3. Create an isolated temporary database and run GPU SIFT on one source image.
+Resizing applies only to SfM's internal feature-extraction images. Source files remain untouched, and this setting does not change Step 5 output resolution. The same ratios apply to other input resolutions, without upscaling.
 
-A successful preflight confirms that the launcher, selected command-line contract, packaged libraries, and GPU SIFT startup work together. It does not guarantee that every image will register in the scene. The spherical mapper intentionally produces one reconstruction component so the downstream `sparse/0` contract stays stable; if the capture separates into disconnected groups, improve overlap or matching rather than expecting several output components.
+The feature count is a limit, not a guaranteed number of detections. 32,768 is an **app starting point** for coverage across a full 360° image, not an official COLMAP optimum for 8K. Use Standard to retain fine details such as distant textures, or Light/Lightest to inspect a capture route sooner. A higher limit cannot compensate for textureless walls, strong motion blur, or insufficient overlap.
 
-On RTX 50-series GPUs, older CUDA builds can fail during GPU SIFT. If that happens, select a COLMAP build made with a CUDA architecture that supports the GPU.
+All settings use video-oriented Sequential matching and the Incremental Mapper, with Guided Matching off. This follows the basic pipeline in the [official panorama example](https://github.com/colmap/colmap/blob/4.2.0/python/pycolmap/panorama.py); changing the processing setting does not change the matching method or solver iteration settings.
 
-#### Updating an Existing Project
+#### Choosing Loop Detection
 
-- An existing successful COLMAP 4.1 sparse model does not need to be rebuilt only because COLMAP 4.2 is available. Step 5 can continue to convert it.
-- Existing scene settings remain valid. Point the Step 4 field at the new `COLMAP.bat` when moving to the official 4.2 Windows package.
-- If an older app build stopped on the unsupported `--Mapper.ba_global_images_ratio` option, update this app and rerun Step 4. The current command contract uses the supported COLMAP option.
-- If launching `bin/colmap.exe` directly previously failed to find packaged DLLs, select the top-level `COLMAP.bat` or rerun with the current app, which redirects that executable selection to the package launcher.
+- **Off (default):** one-way passes, or when keeping processing time down is the priority.
+- **On:** walks that return to their starting point, re-enter rooms, or retrace a route. Matches revisited places even when frames are far apart in time.
 
-The SfM working folder is `output/colmap_equirect/`. Create JSON/PLY or cubemap datasets from that result in Step 5 with `COLMAP Spherical -> NeRF Dataset (JSON/PLY)`.
+Additional matching takes time. On first use, COLMAP downloads vocabulary data and needs an internet connection; subsequent runs use its cache. Loop detection helps connect distant portions of a capture, but overlap is still necessary.
+
+#### Reviewing and Rerunning
+
+Before processing, the app checks CLI capabilities and GPU SIFT startup on one image. Afterward, inspect the camera path, registered images, and point cloud in the preview. This route produces one reconstruction. If the path lacks connections, review frame spacing, blur, overlap, and loop detection for revisited areas.
+
+Rerun SfM in Step 4 to apply a different processing setting or loop-detection choice. Existing SfM working results are recreated after replacement confirmation; source images are retained. To reuse an already successful sparse model, run only the Step 5 conversion.
+
+Old Standard and Quality settings migrate to the new Standard; old Fast migrates to Lightest. Sequential matching is used regardless of the old matcher selection, and loop detection defaults to off when absent from saved settings.
+
+The SfM working folder is `output/colmap_equirect/`. Create JSON/PLY or cubemap datasets for training apps in Step 5 with `COLMAP Spherical -> NeRF Dataset (JSON/PLY)`.
 
 ### Metashape -> RealityScan Data
 

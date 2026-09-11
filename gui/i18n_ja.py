@@ -593,11 +593,12 @@ STRINGS: dict[str, str] = {
     "SPHERESFM_EXECUTABLE": "COLMAPランチャー",
     "SPHERESFM_REPOSITORY_LINK": "COLMAP GitHub",
     "SPHERESFM_USE_MASKS": "masks/ を使用",
-    "SPHERESFM_QUALITY_COMPACT": "SfM品質:",
-    "SPHERESFM_QUALITY_FAST": "軽量",
+    "SPHERESFM_QUALITY_COMPACT": "処理設定:",
+    "SPHERESFM_QUALITY_LIGHT": "軽量",
+    "SPHERESFM_QUALITY_LIGHTEST": "最軽量",
     "SPHERESFM_QUALITY_STANDARD": "標準",
-    "SPHERESFM_QUALITY_QUALITY": "クオリティ",
-    "SPHERESFM_MATCHER_SPATIAL": "Spatial",
+    "SPHERESFM_LOOP_DETECTION": "ループ検出",
+    "COLMAP_REFRESH_RIG_IMAGES": "現在のカメラ設定でビュー画像をそろえるため、「画像変換」もONにして実行してください。",
     "SPHERESFM_POSE_FILE": "POSファイル(旧設定)",
     "SPHERESFM_OPEN_GUI": "結果をCOLMAP GUIで表示",
     "SPHERESFM_RESULT_NOT_FOUND": "COLMAP球面のsparseモデルが見つかりません: {path}",
@@ -622,9 +623,11 @@ STRINGS: dict[str, str] = {
     "SPHERESFM_POSE_NOT_FOUND": "POSファイルが見つかりません: {path}",
     "SPHERESFM_RTX50_CUDA_ERROR_TITLE": "COLMAP CUDA互換性エラー",
     "SPHERESFM_RTX50_CUDA_ERROR_BODY": (
-        "COLMAPのGPU処理が、RTX 50系でよく出るCUDAアーキテクチャ不一致エラーで停止しました。\n\n"
-        "選択したCOLMAPパッケージがRTX 50系 (sm_120) 向けにビルドされていない可能性があります。"
-        "CUDA 13.x以降と CMAKE_CUDA_ARCHITECTURES=120 でビルドされたCOLMAPを指定してください。\n\n"
+        "COLMAPのGPU処理でCUDA互換性エラーが発生しました。\n\n"
+        "RTX 50シリーズには公式COLMAP 4.2.0のWindows CUDA版が対応しています。"
+        "公式CUDA版ZIPを展開し、最上位のCOLMAP.batを指定してください。"
+        "RTX 50対応のための自前ビルドは不要です。"
+        "公式版でも続く場合は、NVIDIAドライバーとログを確認してください。\n\n"
         "ログ: {log_path}"
     ),
     "COLMAP_MATCHER_COMPACT": "Matcher:",
@@ -1365,8 +1368,8 @@ TIPS: dict[str, str] = {
         "通常の歩行撮影は「歩行・標準」から始めます。近い壁、展示物、家具が多い場合は「歩行・近接」。公園、広場、外観など対象が遠めなら「歩行・広域」。空撮は「ドローン・遠景」を選びます。\n"
         "秒数は選択後に手動調整できます。"
     ),
-    "FFMPEG_PATH": "ffmpegの実行パス。PATHに通っていれば 'ffmpeg' でOK",
-    "FFPROBE_PATH": "ffprobeの実行パス。動画情報の取得に使用",
+    "FFMPEG_PATH": "動画のフレーム抽出に使用します。7以降が必要です。未導入の場合はセットアップでインストールできます",
+    "FFPROBE_PATH": "動画情報の取得に使用します。FFmpeg 7以降に同梱のものを指定してください",
     "FILENAME_PREFIX": "出力ファイル名の接頭辞。空欄なら動画ファイル名を自動使用",
     "SAMPLE_BTN": "動画の一部をサンプリングしてフレーム数を再推定 (自動間隔モードのみ)",
     "EXPORT_DIR": "採用フレームのコピー先フォルダ名。'images'ならインプレース処理",
@@ -1548,16 +1551,12 @@ TIPS: dict[str, str] = {
     "POSTSHOT_EXPORT_SPLAT": "学習後にPLYまたはSPZを書き出すパスです。ファイル名だけならTraining Output内に保存します",
     "COLMAP_REPOSITORY_LINK": "COLMAPの公式GitHubリポジトリを開きます。COLMAP本体やビルド情報を確認できます",
     "SPHERESFM_REPOSITORY_LINK": "公式COLMAPのGitHubリポジトリを開きます。COLMAP本体は、このアプリには同梱されていません",
-    "COLMAP_EXECUTABLE": "この環境で使うCOLMAPランチャーです。公式Windows配布版ではCOLMAP.batを選びます。bin内のcolmap.exeを選んだ場合も、同梱のCOLMAP.batを自動使用します",
+    "COLMAP_EXECUTABLE": "公式Windows CUDA版を展開してCOLMAP.batを選びます。公式4.2.0はRTX 50シリーズにも対応し、自前ビルドは不要です。bin内のcolmap.exeを選んだ場合も、同梱ランチャーを自動使用します",
     "GLOMAP_EXECUTABLE": "GLOMAP mapperを選ぶ場合に使う glomap.exe のパス。COLMAPのGlobal Mapperを使う場合は不要です",
-    "SPHERESFM_EXECUTABLE": "公式COLMAP 4.1以降（4.2推奨）のランチャーを指定します。Windows配布版ではCOLMAP.batを選び、ネイティブEQUIRECTANGULARカメラで球面画像SfMを行います",
+    "SPHERESFM_EXECUTABLE": "公式4.2.0のWindows CUDA版を展開してCOLMAP.batを選びます。RTX 50シリーズにも対応しています。既存の4.1も利用できます",
     "SPHERESFM_USE_MASKS": "ONにするとStep 3のマスクをSfM時の除外範囲として使います。必要な形式への変換はアプリが自動で行います",
-    "SPHERESFM_MATCHER": (
-        "Sequentialは高速で動画の連番フレーム向けです。\n"
-        "Exhaustiveは全ペアを照合するため精度が出る場合がありますが、枚数が増えると極端に遅くなることがあります。\n"
-        "SpatialはCOLMAP database内にある位置事前情報で近傍画像を照合します"
-    ),
-    "SPHERESFM_QUALITY_PRESET": "軽量は処理時間を短くします。標準は処理時間とSfM結果の品質のバランスを取ります。クオリティは時間をかけて、カメラ位置と点群をより丁寧に推定します",
+    "SPHERESFM_LOOP_DETECTION": "一周して戻る撮影や往復する撮影で、時間が離れた同じ場所も照合します。処理時間が増え、初回は照合用データのダウンロードが必要です。通り抜けるだけの撮影ではOFFのまま使えます",
+    "SPHERESFM_QUALITY_PRESET": "標準は入力解像度のまま、特徴点上限32,768で細部を活用します。軽量は縦横1/2・16,384点、最軽量は縦横1/4・8,192点で時間とGPUメモリを節約します。元画像や出力画像の解像度は変わりません",
     "SPHERESFM_POSE_FILE": "旧プロジェクト設定との互換用です。公式COLMAP球面SfMでは、この画面から位置ファイルを取り込みません",
     "SPHERESFM_OPEN_GUI": "COLMAP球面SfMの結果をCOLMAP GUIで開き、カメラ位置と点群を確認します。表示にはGUI対応のCOLMAPビルドが必要です",
     "SCENE_PREVIEW_OPEN": "SfM結果またはデータセット出力を読み取り専用で開き、カメラ・点群・画像対応を確認します。",

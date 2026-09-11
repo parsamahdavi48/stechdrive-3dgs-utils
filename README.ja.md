@@ -1,6 +1,6 @@
 # stechdrive-3dgs-utils
 
-**v1.25.3**
+**v1.25.5**
 
 ## これは何？
 
@@ -12,7 +12,7 @@
 
 通常利用は、最新リリースZIPをダウンロードしてください。
 
-[stechdrive-3dgs-utils-v1.25.3.zip をダウンロード](https://github.com/stechdrive/stechdrive-3dgs-utils/releases/download/v1.25.3/stechdrive-3dgs-utils-v1.25.3.zip)
+[stechdrive-3dgs-utils-v1.25.5.zip をダウンロード](https://github.com/stechdrive/stechdrive-3dgs-utils/releases/download/v1.25.5/stechdrive-3dgs-utils-v1.25.5.zip)
 
 ZIPを展開したら、`setup_windows.bat`、続いて `run_gui.bat` を実行します。
 
@@ -69,6 +69,8 @@ run_gui.bat
 
 初回の `setup_windows.bat` は少し時間がかかります。Python 3.12、FFmpeg/FFprobe、GPU向けのPythonパッケージなどを確認し、不足しているものをできる範囲で準備します。
 
+動画のフレーム抽出には **FFmpeg 7以降と同梱のFFprobe** が必要です。どちらかが未導入なら、セットアップがwinget経由で現在のGyan FFmpegパッケージをインストールします。PATH上に古い版やバージョンを判定できないビルドがある場合は、更新方法を案内して停止します。wingetで導入した場合は `winget upgrade --id Gyan.FFmpeg --exact --source winget` を実行し、ターミナルを開き直してからセットアップを再実行してください。Step 1でも動画処理の開始前に、選択された実行ファイルを確認します。既存の連番静止画を取り込む場合はFFmpegを必要としません。
+
 Pythonパッケージはこのアプリ専用の仮想環境に入れるため、普段使っているPython環境を汚しにくい構成です。セットアップ完了後は、通常 `run_gui.bat` を実行するだけでGUIを起動できます。
 
 ### セットアップ内容
@@ -86,6 +88,8 @@ update.bat
 ```
 
 `update.bat` は公式GitHub Releaseからアプリ本体を更新し、現在の `.venv/` がリリース推奨の依存関係と一致しない場合だけ依存パッケージを更新します。古いリリースに残っていた不要なアプリ管理ファイルは削除しますが、`.venv/`、`.cache/`、`models/`、シーンフォルダ、その他ユーザーフォルダは残します。アプリ本体だけ更新する場合は `update.bat --app-only`、依存だけ更新する場合は `update.bat --deps-only` を使います。環境を最初から作り直す場合は `setup_windows.bat --force` を使います。
+
+`update.bat` は導入済みのFFmpegを更新しません。古いアプリから更新する場合も、動画のフレーム抽出にはFFmpegとFFprobeの両方が7以降である必要があります。Step 1でバージョン非対応と表示された場合は、[FFmpegの更新手順](doc/extract_frames_gui.ja.md)に従って更新し、GUIを再起動してください。実行ファイルのパスを手動指定していた場合は、更新後のものを選び直します。
 
 まだ `update.bat` が入っていない古い展開済みリリースから更新する場合は、GUIを閉じ、新しいZIPを開いて中の `stechdrive-3dgs-utils-v...` フォルダへ入り、その中身を今使っているアプリフォルダへ上書きコピーしてから、既存アプリフォルダの `update.bat` を一度実行します。
 
@@ -226,15 +230,15 @@ Metashapeでベースの360°画像を安定してSfMし、その結果をRealit
 
 1. Step 1からStep 3まではMetashapeルートと同じです。
 2. Step 4で `COLMAPでSfMを実行` を選びます。360°画像はCubemap Rigへ展開し、通常画像は通常カメラとして扱います。
-3. [COLMAP](https://github.com/colmap/colmap)のランチャーまたはGLOMAPの実行ファイル、Matcher、Mapperを確認して実行します。公式Windows版COLMAPでは最上位の `COLMAP.bat` を選びます。
+3. COLMAPのランチャーまたはGLOMAPの実行ファイル、Matcher、Mapperを確認して実行します。Windowsでは[公式COLMAP 4.2.0 CUDA版ZIP](https://github.com/colmap/colmap/releases/download/4.2.0/colmap-x64-windows-cuda.zip)をダウンロード・展開し、最上位の `COLMAP.bat` を選びます。
 4. 完了後は `output/colmap_rig/` をCOLMAPデータセットとして、COLMAP対応の3DGSアプリに渡します。追加変換が不要な場合はStep 5をスキップして学習へ進めます。
 
 ## COLMAP球面SfMルート
 
-1. Step 1からStep 3まではMetashapeルートと同じです。COLMAP球面SfMでは、同一解像度のエクイレクタングラー360°画像だけを入力にするのが安全です。
-2. Step 4で `COLMAP球面SfMを実行` を選び、公式COLMAP 4.1以降（4.2推奨）のランチャーを指定します。公式Windows配布版では最上位の `COLMAP.bat` を選びます。同じ配布物の `bin/colmap.exe` を選んだ場合も、アプリが隣接するバッチランチャーへ自動で切り替えるため、同梱ライブラリの検索パスを維持できます。
-3. RTX 50系GPUでは、古いCUDAビルドがGPU SIFTで停止することがあります。その場合は、GPUに対応したCUDAアーキテクチャでビルドされたCOLMAPを指定してください。
-4. `Matcher: Sequential`, `SfM品質: 標準` から始めます。本処理の前に、選択した特徴抽出・Matcher・Mapperの全オプションを検査し、画像1枚でGPU SIFTを実行します。
+1. Step 1からStep 3まではMetashapeルートと同じです。COLMAP球面SfMでは、同一解像度のエクイレクタングラー360°画像だけを入力にします。
+2. [公式COLMAP 4.2.0 Windows CUDA版ZIP](https://github.com/colmap/colmap/releases/download/4.2.0/colmap-x64-windows-cuda.zip)をダウンロード・展開します。Step 4で `COLMAP球面SfMを実行` を選び、最上位の `COLMAP.bat` を指定します。この配布版はRTX 50シリーズに対応しており、そのGPU世代への対応のために自前ビルドする必要はありません。
+3. `処理設定: 標準` は入力解像度のまま、特徴点上限32,768で処理します。時間やGPUメモリを節約したい場合は `軽量`（縦横1/2・16,384点）、`最軽量`（縦横1/4・8,192点）を選びます。照合は動画向けのSequentialに統一し、同じ場所に戻る撮影では `ループ検出` をONにできます。
+4. 実行前にCOLMAPの機能とGPU SIFTの起動を自動確認します。完了後はプレビューでカメラの経路、登録画像、点群を確認します。
 5. Step 5で `COLMAP球面 → NeRFデータセット(JSON/PLY)` を選び、PINHOLEのCubemapデータにするか、LichtFeld向けのERP 360°データにするかを選びます。
 6. 完了後は、`output/colmap_equirect_3dgut/` または `output/colmap_equirect_cubemap/` を下流アプリへ渡します。COLMAP球面SfMの作業ファイルは `output/colmap_equirect/` にまとまります。
 
@@ -244,12 +248,13 @@ COLMAPは外部アプリであり、`setup_windows.bat` ではインストール
 
 | 確認項目 | 選び方 |
 | --- | --- |
-| 球面SfMのバージョン | COLMAP 4.1が対応下限です。球面Guided Matchingを使う `クオリティ` では特に、COLMAP 4.2以降を推奨します。 |
-| 公式Windows配布版 | 最上位の `COLMAP.bat` を選びます。同じ配布物の `bin/colmap.exe` を選んでも、アプリが隣接するバッチランチャーへ自動切り替えするため安全です。 |
+| 球面SfMのバージョン | COLMAP 4.1が対応下限です。公式4.2.0 CUDA版を使い、処理設定は細部を重視するか、時間とGPUメモリを節約するかで選びます。 |
+| 公式Windows配布版 | `colmap-x64-windows-cuda.zip` を選び、最上位の `COLMAP.bat` を指定します。同じ配布物の `bin/colmap.exe` を選んでも、バッチランチャーへ自動切り替えします。 |
+| RTX 50シリーズ | 公式4.2.0 CUDA版が対応しています。RTX 5080でGPU SIFT特徴抽出と標準マッチングを確認済みで、RTX 50対応のための自前ビルドは不要です。 |
 | PATH / カスタムビルド | 未指定なら、WindowsではPATH上の `COLMAP.bat`、次に `colmap.exe` を検索します。必要な実行時ライブラリとCLIオプションを持つ単体 `colmap.exe` も使えます。 |
-| 本処理の前 | バージョンと選択中プリセットに必要な全オプションを検査し、画像1枚でGPU SIFTを試します。事前検査の成功は起動互換性の確認であり、全画像の登録成功を保証するものではありません。 |
+| 結果の確認 | 完了後はプレビューで撮影経路と登録画像を確認します。つながりが不足する場合はフレーム間隔・ブレ・画像の重なりや、再訪部分のループ検出を見直します。 |
 
-既存のCOLMAP 4.1で成功済みのSparseモデルは、4.2が公開されたという理由だけで再作成する必要はありません。移行とトラブル対応は [Step 4 / Step 5ガイド](doc/cubemap_tools_gui.ja.md#colmap球面sfmを実行) を参照してください。
+既存のCOLMAP 4.1で成功済みのSparseモデルはそのまま利用できます。設定の選び方と既存プロジェクトの扱いは [Step 4 / Step 5ガイド](doc/cubemap_tools_gui.ja.md#colmap球面sfmを実行) を参照してください。
 
 ## 通常画像・通常動画のマスク前処理
 
@@ -272,7 +277,7 @@ COLMAPは外部アプリであり、`setup_windows.bat` ではインストール
 - Python 3.12 (3.12.10で確認)
 - CUDA対応GPU
 - CUDA Toolkit 12.8
-- FFmpeg / FFprobe (`setup_windows.bat` が未検出時にwinget経由で Gyan.FFmpeg を導入)
+- 動画のフレーム抽出にはFFmpeg 7以降と同梱のFFprobe（`setup_windows.bat` が未検出時にwinget経由で Gyan.FFmpeg を導入）
 - アプリ内COLMAPルートを使う場合のみ、別途COLMAPが必要（球面SfMは4.1以降必須、4.2以降推奨）
 
 `setup_windows.bat` で解決される主なPythonパッケージ:
@@ -282,7 +287,7 @@ torch / torchvision / torchaudio from the CUDA 12.8 wheel index
 numpy, opencv-python, Pillow, open3d, ultralytics, tqdm, PySide6, sam3, timm, huggingface-hub, pycocotools
 ```
 
-`setup_windows.bat` は `requirements/` 以下の検証済み固定セットを使い、初回セットアップの再現性を優先します。`update.bat` はアプリ本体と既存の `.venv/` を現在のリリースに揃えます。互換する最新依存を明示的に試したい場合だけ `--latest-deps` を渡します。通常のリリース利用では、更新コマンドは `update.bat` だけです。
+`setup_windows.bat` は `requirements/` 以下の検証済み固定セットを使い、初回セットアップの再現性を優先します。`update.bat` はアプリ本体と既存の `.venv/` を現在のリリースに揃えます。互換する最新依存を明示的に試したい場合だけ `--latest-deps` を渡します。通常のリリース利用では、アプリ本体とPython環境の更新に `update.bat` を使います。FFmpegは必要に応じて上記の手順で別途更新してください。
 
 ## ライセンス
 

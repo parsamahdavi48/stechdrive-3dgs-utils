@@ -1,6 +1,6 @@
 # stechdrive-3dgs-utils
 
-**v1.25.3**
+**v1.25.5**
 
 ## What Is This?
 
@@ -12,7 +12,7 @@ The main workflow is to organize and mask ERP/equirectangular footage from camer
 
 For normal use, download the latest release ZIP:
 
-[Download stechdrive-3dgs-utils-v1.25.3.zip](https://github.com/stechdrive/stechdrive-3dgs-utils/releases/download/v1.25.3/stechdrive-3dgs-utils-v1.25.3.zip)
+[Download stechdrive-3dgs-utils-v1.25.5.zip](https://github.com/stechdrive/stechdrive-3dgs-utils/releases/download/v1.25.5/stechdrive-3dgs-utils-v1.25.5.zip)
 
 After extracting the ZIP, run `setup_windows.bat`, then `run_gui.bat`.
 
@@ -69,6 +69,8 @@ run_gui.bat
 
 The first `setup_windows.bat` run can take a while. It checks Python 3.12, FFmpeg/FFprobe, GPU-oriented Python packages, and prepares missing pieces where it can.
 
+Video extraction requires **FFmpeg 7 or newer and its bundled FFprobe**. Setup installs the current Gyan FFmpeg package through winget if either tool is missing. If an older or unidentifiable build is already on PATH, setup stops with update instructions. For a winget installation, run `winget upgrade --id Gyan.FFmpeg --exact --source winget`, then reopen the terminal and rerun setup. Step 1 also checks the selected executables before processing a video. Importing an existing image sequence does not require FFmpeg.
+
 Python packages are installed into a virtual environment dedicated to this app, so your everyday Python environment is less likely to be affected. After setup completes, normal use is just running `run_gui.bat` to launch the GUI.
 
 ### Setup Details
@@ -86,6 +88,8 @@ update.bat
 ```
 
 `update.bat` updates the app files from the official GitHub release and only updates `.venv/` when the current environment does not match the release's recommended dependencies. It also removes obsolete app-managed files from older releases while preserving `.venv/`, `.cache/`, `models/`, scene folders, and other user folders. Use `update.bat --app-only` for app files only or `update.bat --deps-only` for dependencies only. To recreate the environment from scratch, run `setup_windows.bat --force`.
+
+`update.bat` does not upgrade an existing FFmpeg installation. When updating from an older app release, video extraction also requires FFmpeg and FFprobe 7 or newer. If Step 1 reports an unsupported version, follow the [FFmpeg update instructions](doc/extract_frames_gui.md), restart the GUI, and reselect the updated executables if you previously set their paths manually.
 
 If you are updating an older extracted release that does not yet have `update.bat`, close the GUI, open the new ZIP, enter its top-level `stechdrive-3dgs-utils-v...` folder, copy that folder's contents into your existing app folder with overwrite enabled, then run `update.bat` once from the existing app folder.
 
@@ -226,15 +230,15 @@ Use this route when Metashape aligns the base 360° images well, but you want Re
 
 1. Use Steps 1-3 in the same way as the Metashape route.
 2. In Step 4, choose `Run COLMAP SfM`. 360° images are expanded into cubemap rigs, while normal images remain normal cameras.
-3. Confirm the [COLMAP](https://github.com/colmap/colmap) launcher or GLOMAP executable, matcher, and mapper, then run it. For an official Windows COLMAP package, select its top-level `COLMAP.bat`.
+3. Confirm the COLMAP launcher or GLOMAP executable, matcher, and mapper, then run it. For Windows, download the [official COLMAP 4.2.0 CUDA ZIP](https://github.com/colmap/colmap/releases/download/4.2.0/colmap-x64-windows-cuda.zip), extract it, and select its top-level `COLMAP.bat`.
 4. After completion, pass `output/colmap_rig/` as a COLMAP dataset to COLMAP-compatible 3DGS tools. When no extra conversion is needed, you can skip Step 5 and continue to training.
 
 ## COLMAP Spherical SfM Route
 
 1. Use Steps 1-3 in the same way as the Metashape route. For COLMAP spherical SfM, use same-resolution equirectangular 360° images only.
-2. In Step 4, choose `Run COLMAP Spherical SfM` and select an official COLMAP 4.1+ launcher. COLMAP 4.2 or newer is recommended. With the official Windows package, select the top-level `COLMAP.bat`; if you select its `bin/colmap.exe`, the app automatically uses the adjacent batch launcher so packaged libraries are available.
-3. On RTX 50-series GPUs, older CUDA builds can stop during GPU SIFT. If that happens, select a COLMAP build made with a CUDA architecture that supports the GPU.
-4. Start with `Matcher: Sequential` and `SfM Quality: Standard`. Before processing all images, the app checks the selected feature, matcher, and mapper options and runs a one-image GPU SIFT preflight.
+2. Download the [official COLMAP 4.2.0 Windows CUDA ZIP](https://github.com/colmap/colmap/releases/download/4.2.0/colmap-x64-windows-cuda.zip) and extract it. In Step 4, choose `Run COLMAP Spherical SfM` and select the top-level `COLMAP.bat`. This package supports RTX 50-series GPUs; a custom build is not required for that GPU generation.
+3. `Processing: Standard` uses input resolution and up to 32,768 features. Choose `Light` (half width/height, 16,384 features) or `Lightest` (quarter width/height, 8,192 features) to save time and GPU memory. All settings use video-oriented Sequential matching; enable `Loop detection` when your capture revisits places.
+4. The app automatically checks COLMAP capabilities and GPU SIFT startup before processing. Afterward, inspect the camera path, registered images, and point cloud in the preview.
 5. In Step 5, choose `COLMAP Spherical -> NeRF Dataset (JSON/PLY)`, then choose PINHOLE cubemap output or ERP 360° data for LichtFeld.
 6. After completion, pass `output/colmap_equirect_3dgut/` or `output/colmap_equirect_cubemap/` to downstream apps. COLMAP spherical SfM working files stay under `output/colmap_equirect/`.
 
@@ -244,12 +248,13 @@ COLMAP is an external application and is not installed by `setup_windows.bat`.
 
 | Check | Guidance |
 | --- | --- |
-| Spherical SfM version | COLMAP 4.1 is the supported minimum. COLMAP 4.2 or newer is recommended, especially for the `Quality` preset that uses spherical guided matching. |
-| Official Windows package | Select the top-level `COLMAP.bat`. Selecting that package's `bin/colmap.exe` is also safe because the app switches to the adjacent batch launcher automatically. |
+| Spherical SfM version | COLMAP 4.1 is the supported minimum. Use the official 4.2.0 CUDA package and choose a processing setting based on detail retention, time, and GPU memory. |
+| Official Windows package | Choose `colmap-x64-windows-cuda.zip` and select the top-level `COLMAP.bat`. Selecting that package's `bin/colmap.exe` also switches to the batch launcher automatically. |
+| RTX 50-series | The official 4.2.0 CUDA package supports this GPU generation. GPU SIFT extraction and standard matching were verified on an RTX 5080; no custom build is needed for RTX 50 support. |
 | PATH or custom build | Leaving the field blank searches for `COLMAP.bat`, then `colmap.exe` on Windows. A standalone `colmap.exe` remains supported when it has all required runtime libraries and CLI options. |
-| Before a full run | The app verifies the version and exact options needed by the selected preset, then tests GPU SIFT with one image. Passing this preflight confirms startup compatibility, not that every scene image will register. |
+| Reviewing results | Inspect the capture path and registered images in the preview. If connections are missing, review frame spacing, blur, overlap, and loop detection for revisited places. |
 
-Existing successful COLMAP 4.1 sparse models do not need to be rebuilt only because COLMAP 4.2 is available. See the [Step 4 / Step 5 guide](doc/cubemap_tools_gui.md#run-colmap-spherical-sfm) for migration and troubleshooting details.
+Existing successful COLMAP 4.1 sparse models can still be used. See the [Step 4 / Step 5 guide](doc/cubemap_tools_gui.md#run-colmap-spherical-sfm) for choosing settings and working with existing projects.
 
 ## Mask Preprocessing for Normal Images
 
@@ -272,7 +277,7 @@ Use this when you want to exclude people, vehicles, blown-out regions, or simila
 - Python 3.12 (3.12.10 confirmed)
 - CUDA-capable GPU
 - CUDA Toolkit 12.8
-- FFmpeg / FFprobe (`setup_windows.bat` installs Gyan.FFmpeg through winget when missing)
+- FFmpeg 7 or newer and its bundled FFprobe for video extraction (`setup_windows.bat` installs Gyan.FFmpeg through winget when missing)
 - External COLMAP installation only when running an in-app COLMAP route (4.1+ required for spherical SfM; 4.2+ recommended)
 
 Main Python packages resolved by `setup_windows.bat`:
@@ -282,7 +287,7 @@ torch / torchvision / torchaudio from the CUDA 12.8 wheel index
 numpy, opencv-python, Pillow, open3d, ultralytics, tqdm, PySide6, sam3, timm, huggingface-hub, pycocotools
 ```
 
-`setup_windows.bat` uses the pinned verified package set under `requirements/` for reproducible first-time setup. `update.bat` keeps the app and the existing `.venv/` aligned with the current release; pass `--latest-deps` only when you explicitly want to try the latest compatible dependency versions. For normal release users, `update.bat` is the only update command.
+`setup_windows.bat` uses the pinned verified package set under `requirements/` for reproducible first-time setup. `update.bat` keeps the app and the existing `.venv/` aligned with the current release; pass `--latest-deps` only when you explicitly want to try the latest compatible dependency versions. For normal release users, use `update.bat` to update the app and its Python environment. Update FFmpeg separately when needed, as described above.
 
 ## License
 
