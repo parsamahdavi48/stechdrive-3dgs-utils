@@ -1,6 +1,14 @@
 # stechdrive-3dgs-utils
 
-**v1.25.5**
+**Personal fork release: v1.25.5-pm1** (based on upstream v1.25.5).
+
+Maintained by [parsamahdavi48](https://github.com/parsamahdavi48), with full credit to [StechDrive](https://github.com/stechdrive/stechdrive-3dgs-utils). This release includes the balanced frame-selector fix for FFmpeg errors on large selections. The fix was tested locally and confirmed working on the affected Windows computer. [Upstream report and fix](https://github.com/stechdrive/stechdrive-3dgs-utils/pull/3).
+
+**Use this fork's release ZIP below.** Extract it into a new folder, run `setup_windows.bat`, then `run_gui.bat`. The application itself still displays the upstream base version, v1.25.5.
+
+**Updates:** the inherited `update.bat` still downloads from the original StechDrive repository and can overwrite this fork's changes. For this personal release, download future updates from [this fork's Releases page](https://github.com/parsamahdavi48/stechdrive-3dgs-utils/releases) instead. The update instructions later in this README describe upstream behavior.
+
+The original MIT license, author attribution, and third-party notices are preserved.
 
 ## What Is This?
 
@@ -12,7 +20,7 @@ The main workflow is to organize and mask ERP/equirectangular footage from camer
 
 For normal use, download the latest release ZIP:
 
-[Download stechdrive-3dgs-utils-v1.25.5.zip](https://github.com/stechdrive/stechdrive-3dgs-utils/releases/download/v1.25.5/stechdrive-3dgs-utils-v1.25.5.zip)
+[Download stechdrive-3dgs-utils-v1.25.5-pm1.zip](https://github.com/parsamahdavi48/stechdrive-3dgs-utils/releases/download/v1.25.5-pm1/stechdrive-3dgs-utils-v1.25.5-pm1.zip)
 
 After extracting the ZIP, run `setup_windows.bat`, then `run_gui.bat`.
 
