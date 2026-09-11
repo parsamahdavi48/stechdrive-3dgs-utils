@@ -17,7 +17,7 @@ from PySide6.QtCore import QObject, QProcess, QProcessEnvironment, QThread, QTim
 
 from core.app_job import APP_JOB_WORKFLOW, AppJob, run_app_job
 from core.cancellation import AppJobCancelled
-from core.colmap_cli import colmap_batch_qprocess_native_arguments
+from core.colmap_cli import colmap_batch_qprocess_native_arguments, colmap_process_environment
 from gui.common.runner_types import StepCommand, StepCommandPhase, StepCommandQueue
 
 _WORKFLOW_JOB_MODULE = "core.workflow_job_cli"
@@ -208,7 +208,10 @@ class ProcessRunner(QObject):
             proc.setArguments(cmd[1:])
         else:
             proc.setNativeArguments(native_arguments)
-        env = QProcessEnvironment.systemEnvironment()
+        process_environment = colmap_process_environment(cmd)
+        env = QProcessEnvironment()
+        for name, value in process_environment.items():
+            env.insert(name, value)
         env.insert("PYTHONUTF8", "1")
         env.insert("PYTHONIOENCODING", "utf-8")
         proc.setProcessEnvironment(env)

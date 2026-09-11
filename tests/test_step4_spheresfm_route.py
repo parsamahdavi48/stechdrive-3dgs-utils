@@ -313,6 +313,9 @@ def test_spheresfm_open_gui_warns_when_selected_binary_has_no_gui_support(
         def setArguments(self, arguments: list[str]) -> None:
             self.arguments = arguments
 
+        def setProcessEnvironment(self, environment) -> None:
+            self.environment = environment
+
         def setProcessChannelMode(self, _mode) -> None:
             pass
 

@@ -1,8 +1,10 @@
 # stechdrive-3dgs-utils
 
-**Personal fork release: v1.25.5-pm1** (based on upstream v1.25.5).
+**Personal fork release: v1.25.5-pm2** (based on upstream v1.25.5).
 
 Maintained by [parsamahdavi48](https://github.com/parsamahdavi48), with full credit to [StechDrive](https://github.com/stechdrive/stechdrive-3dgs-utils). This release includes the balanced frame-selector fix for FFmpeg errors on large selections. The fix was tested locally and confirmed working on the affected Windows computer. [Upstream report and fix](https://github.com/stechdrive/stechdrive-3dgs-utils/pull/3).
+
+This release also avoids the official Windows COLMAP launcher's `1920 was unexpected at this time.` error. For recognized official packages, StechDrive runs `bin/colmap.exe` directly with the package's DLL and Qt plugin paths. You can keep selecting `COLMAP.bat` in settings; no manual batch-file edit is needed. Custom launchers retain their original behavior. This resolves the launcher failure before SfM starts; it does not guarantee a successful reconstruction for every dataset.
 
 **Use this fork's release ZIP below.** Extract it into a new folder, run `setup_windows.bat`, then `run_gui.bat`. The application itself still displays the upstream base version, v1.25.5.
 
@@ -20,7 +22,7 @@ The main workflow is to organize and mask ERP/equirectangular footage from camer
 
 For normal use, download the latest release ZIP:
 
-[Download stechdrive-3dgs-utils-v1.25.5-pm1.zip](https://github.com/parsamahdavi48/stechdrive-3dgs-utils/releases/download/v1.25.5-pm1/stechdrive-3dgs-utils-v1.25.5-pm1.zip)
+[Download stechdrive-3dgs-utils-v1.25.5-pm2.zip](https://github.com/parsamahdavi48/stechdrive-3dgs-utils/releases/download/v1.25.5-pm2/stechdrive-3dgs-utils-v1.25.5-pm2.zip)
 
 After extracting the ZIP, run `setup_windows.bat`, then `run_gui.bat`.
 
@@ -257,7 +259,7 @@ COLMAP is an external application and is not installed by `setup_windows.bat`.
 | Check | Guidance |
 | --- | --- |
 | Spherical SfM version | COLMAP 4.1 is the supported minimum. Use the official 4.2.0 CUDA package and choose a processing setting based on detail retention, time, and GPU memory. |
-| Official Windows package | Choose `colmap-x64-windows-cuda.zip` and select the top-level `COLMAP.bat`. Selecting that package's `bin/colmap.exe` also switches to the batch launcher automatically. |
+| Official Windows package | Choose `colmap-x64-windows-cuda.zip` and select the top-level `COLMAP.bat`. For recognized official packages, selecting either `COLMAP.bat` or `bin/colmap.exe` launches the executable directly with the package's DLL and Qt plugin paths. |
 | RTX 50-series | The official 4.2.0 CUDA package supports this GPU generation. GPU SIFT extraction and standard matching were verified on an RTX 5080; no custom build is needed for RTX 50 support. |
 | PATH or custom build | Leaving the field blank searches for `COLMAP.bat`, then `colmap.exe` on Windows. A standalone `colmap.exe` remains supported when it has all required runtime libraries and CLI options. |
 | Reviewing results | Inspect the capture path and registered images in the preview. If connections are missing, review frame spacing, blur, overlap, and loop detection for revisited places. |

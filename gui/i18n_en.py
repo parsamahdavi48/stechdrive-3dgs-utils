@@ -1552,7 +1552,7 @@ TIPS: dict[str, str] = {
     "POSTSHOT_EXPORT_SPLAT": "Optional PLY or SPZ export path after training. A bare filename is written under Training Output.",
     "COLMAP_REPOSITORY_LINK": "Open the official COLMAP GitHub repository for COLMAP source and build information.",
     "SPHERESFM_REPOSITORY_LINK": "Open the official COLMAP GitHub repository. COLMAP is not bundled with this app.",
-    "COLMAP_EXECUTABLE": "Extract the official Windows CUDA package and select COLMAP.bat. Official 4.2.0 also supports RTX 50-series GPUs without a custom build. Selecting bin/colmap.exe automatically uses the packaged launcher.",
+    "COLMAP_EXECUTABLE": "Extract the official Windows CUDA package and select COLMAP.bat. Official 4.2.0 also supports RTX 50-series GPUs without a custom build. For recognized official packages, either selection runs colmap.exe directly with the package DLL and Qt plugin paths.",
     "GLOMAP_EXECUTABLE": "Path to glomap executable when using the legacy GLOMAP mapper. Not needed for COLMAP Global Mapper.",
     "SPHERESFM_EXECUTABLE": "Extract the official 4.2.0 Windows CUDA package and select COLMAP.bat. RTX 50-series GPUs are supported. Existing 4.1 installations remain supported.",
     "SPHERESFM_USE_MASKS": "When enabled, Step 3 masks are used as excluded areas during SfM. The app automatically converts them to the required format.",

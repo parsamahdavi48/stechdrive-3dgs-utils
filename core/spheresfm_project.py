@@ -8,7 +8,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from core.colmap_cli import build_colmap_command
+from core.colmap_cli import build_colmap_command, colmap_process_environment
 from core.path_safety import safe_clear_path
 from core.spheresfm_cli_contract import required_spheresfm_options
 
@@ -32,14 +32,16 @@ def _parse_colmap_version(output: str) -> tuple[int, int, int] | None:
 
 
 def _run_colmap_capture(colmap: str, *arguments: str) -> subprocess.CompletedProcess[str]:
+    command = build_colmap_command(colmap, *arguments)
     return subprocess.run(
-        build_colmap_command(colmap, *arguments),
+        command,
         capture_output=True,
         text=True,
         encoding="utf-8",
         errors="replace",
         timeout=20,
         check=False,
+        env=colmap_process_environment(command),
     )
 
 

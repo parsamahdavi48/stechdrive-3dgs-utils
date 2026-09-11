@@ -1551,7 +1551,7 @@ TIPS: dict[str, str] = {
     "POSTSHOT_EXPORT_SPLAT": "学習後にPLYまたはSPZを書き出すパスです。ファイル名だけならTraining Output内に保存します",
     "COLMAP_REPOSITORY_LINK": "COLMAPの公式GitHubリポジトリを開きます。COLMAP本体やビルド情報を確認できます",
     "SPHERESFM_REPOSITORY_LINK": "公式COLMAPのGitHubリポジトリを開きます。COLMAP本体は、このアプリには同梱されていません",
-    "COLMAP_EXECUTABLE": "公式Windows CUDA版を展開してCOLMAP.batを選びます。公式4.2.0はRTX 50シリーズにも対応し、自前ビルドは不要です。bin内のcolmap.exeを選んだ場合も、同梱ランチャーを自動使用します",
+    "COLMAP_EXECUTABLE": "公式Windows CUDA版を展開してCOLMAP.batを選びます。公式4.2.0はRTX 50シリーズにも対応し、自前ビルドは不要です。認識できる公式パッケージでは、どちらを選んでもDLLとQtプラグインのパスを設定してcolmap.exeを直接実行します",
     "GLOMAP_EXECUTABLE": "GLOMAP mapperを選ぶ場合に使う glomap.exe のパス。COLMAPのGlobal Mapperを使う場合は不要です",
     "SPHERESFM_EXECUTABLE": "公式4.2.0のWindows CUDA版を展開してCOLMAP.batを選びます。RTX 50シリーズにも対応しています。既存の4.1も利用できます",
     "SPHERESFM_USE_MASKS": "ONにするとStep 3のマスクをSfM時の除外範囲として使います。必要な形式への変換はアプリが自動で行います",

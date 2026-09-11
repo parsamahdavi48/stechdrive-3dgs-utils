@@ -9,10 +9,10 @@ import shutil
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from PySide6.QtCore import QProcess
+from PySide6.QtCore import QProcess, QProcessEnvironment
 from PySide6.QtWidgets import QMessageBox
 
-from core.colmap_cli import build_colmap_command, colmap_batch_qprocess_native_arguments
+from core.colmap_cli import build_colmap_command, colmap_batch_qprocess_native_arguments, colmap_process_environment
 from core.orientation_correction import (
     FINAL_ORIENTATION_LICHTFELD,
     FINAL_ORIENTATION_STAGE_DIRECT_FINALIZE,
@@ -79,6 +79,10 @@ class Step4RuntimeMixin:
             process.setArguments(command[1:])
         else:
             process.setNativeArguments(native_arguments)
+        environment = QProcessEnvironment()
+        for name, value in colmap_process_environment(command).items():
+            environment.insert(name, value)
+        process.setProcessEnvironment(environment)
         process.setProcessChannelMode(QProcess.MergedChannels)
         process.start()
         if not process.waitForStarted(3000):

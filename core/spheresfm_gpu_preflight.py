@@ -8,7 +8,7 @@ import time
 from pathlib import Path
 
 from core.cancellation import CancellationToken, raise_if_cancelled, terminate_process
-from core.colmap_cli import build_colmap_command
+from core.colmap_cli import build_colmap_command, colmap_process_environment
 from core.path_safety import safe_clear_path
 from core.spheresfm_project import iter_images, validate_spheresfm_colmap  # noqa: F401
 
@@ -36,7 +36,7 @@ def run_colmap_command(cmd: list[str], label: str, *, cancel_event: Cancellation
     print("$ " + subprocess.list2cmdline(cmd), flush=True)
     if cancel_event is None:
         try:
-            result = subprocess.run(cmd, check=False)
+            result = subprocess.run(cmd, check=False, env=colmap_process_environment(cmd))
         except OSError as exc:
             raise RuntimeError(f"{label} could not start: {exc}") from exc
         if result.returncode != 0:
@@ -44,7 +44,7 @@ def run_colmap_command(cmd: list[str], label: str, *, cancel_event: Cancellation
         return
 
     try:
-        proc = subprocess.Popen(cmd)
+        proc = subprocess.Popen(cmd, env=colmap_process_environment(cmd))
     except OSError as exc:
         raise RuntimeError(f"{label} could not start: {exc}") from exc
 
